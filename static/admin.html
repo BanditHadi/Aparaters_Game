@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>استریم بتل — پنل کنترل</title>
+  <link rel="manifest" href="/static/manifest-admin.json">
+  <meta name="theme-color" content="#34196e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Streamer Boost">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="icon" type="image/png" href="/static/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0b0a1f; color: #eee; font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif; }
+    header { padding: 18px 24px; background: linear-gradient(90deg, #34196e, #0c3b66); font-weight: 800; font-size: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    header .status { font-size: 13px; font-weight: 700; color: #9b96c4; }
+    header .status b { color: #4dff8a; }
+    header a { color: #9ecbff; text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid #3d7dff; border-radius: 8px; }
+    header a:hover { background: #1a3a6b; }
+    main { max-width: 1400px; margin: 0 auto; padding: 22px; display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+    section { background: #15122e; border: 1px solid #2d2860; border-radius: 14px; padding: 18px; }
+    section.wide { grid-column: 1 / -1; }
+    h2 { margin: 0 0 12px; font-size: 16px; color: #c9a6ff; letter-spacing: .5px; display: flex; justify-content: space-between; align-items: center; }
+    h2 .badge { font-size: 11px; font-weight: 800; background: #5b45e6; border-radius: 8px; padding: 2px 8px; color: #fff; }
+    label { display: block; font-size: 12px; color: #9b96c4; margin: 10px 0 4px; }
+    input, textarea, select { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid #3a3470; background: #0d0b22; color: #fff; font: inherit; }
+    input[type=checkbox] { width: 20px; height: 20px; accent-color: #5b45e6; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+    button { cursor: pointer; border: 0; border-radius: 9px; padding: 10px 14px; font: 700 13px inherit; color: #fff; background: #5b45e6; transition: filter .15s; }
+    button:hover { filter: brightness(1.15); }
+    button.pink { background: #d6338f; } button.green { background: #1fa463; } button.red { background: #c93a3a; } button.cyan { background: #138fb0; } button.orange { background: #d97a1a; } button.gray { background: #3a3470; } button.blue { background: #0052b3; } button.gold { background: #b8860b; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    td, th { padding: 6px 8px; text-align: right; border-bottom: 1px solid #25205a; }
+    th { color: #9b96c4; font-size: 12px; position: sticky; top: 0; background: #15122e; }
+    .scroll { max-height: 320px; overflow-y: auto; }
+    #toast { position: fixed; left: 18px; bottom: 18px; background: #1fa463; padding: 10px 16px; border-radius: 10px; opacity: 0; transition: .3s; font-weight: 700; z-index: 100; }
+    #toast.show { opacity: 1; } #toast.err { background: #c93a3a; }
+    .stat { display: inline-block; margin-left: 18px; color: #9b96c4; font-size: 13px; } .stat b { color: #ffe14a; font-size: 18px; }
+    .ev { padding: 6px 10px; border-right: 3px solid #5b45e6; margin-bottom: 6px; background: #0d0b22; border-radius: 6px; font-size: 12px; }
+    .ev.leader { border-color: #ffd23f; } .ev.overtake { border-color: #4dff8a; } .ev.fire { border-color: #ff7a1a; }
+    .ev.milestone { border-color: #6be7ff; } .ev.chatter { border-color: #ff4fb0; } .ev.achievement { border-color: #b78cff; }
+    .ev.booster { border-color: #ffd23f; background: rgba(60,42,0,.5); }
+    .ev .t { color: #6f6a95; font-size: 11px; margin-right: 6px; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 800; background: #2d2860; color: #c9a6ff; }
+    .pill.danger { background: #5a1a1a; color: #ff9b9b; }
+    .pill.ok { background: #14522f; color: #8dffb8; }
+    .pill.ruby { background: #0a3d7a; color: #9ecbff; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    input[type=range] { padding: 0; height: 22px; }
+    .range-val { font-weight: 800; color: #ffe14a; }
+    #login { position: fixed; inset: 0; background: rgba(5,3,13,.96); display: none; place-items: center; z-index: 100; }
+    #login.on { display: grid; }
+    #login form { width: min(380px, 92vw); background: #15122e; border: 1px solid #2d2860; border-radius: 14px; padding: 22px; }
+    .source-tag { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 800; margin-right: 8px; }
+    .source-tag.demo { background: #5a4a00; color: #ffd75e; }
+    .source-tag.aparat { background: #0a3d7a; color: #9ecbff; }
+    .source-tag.youtube { background: #5a1a1a; color: #ff9b9b; }
+    .source-tag.off { background: #2d2860; color: #c9a6ff; }
+
+    .streamer-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 6px; background: #0d0b22; border: 1px solid #25205a; border-radius: 10px; }
+    .streamer-row img, .streamer-row .pic-fallback { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; border: 2px solid #3a3470; flex: none; }
+    .streamer-row .pic-fallback { display: grid; place-items: center; font-weight: 800; color: #fff; background: #3a3470; font-size: 20px; }
+    .streamer-row .info { flex: 1; min-width: 0; }
+    .streamer-row .name { font-weight: 800; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .streamer-row .uname { color: #9b96c4; font-size: 11px; direction: ltr; text-align: right; }
+    .streamer-row .kws { font-size: 11px; color: #6be7ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .streamer-row .pts { font-weight: 800; color: #ffe14a; font-size: 15px; min-width: 70px; text-align: center; }
+    .streamer-row .actions { display: flex; gap: 6px; flex: none; }
+    .streamer-row .actions button { padding: 8px 12px; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
+    .streamer-row .actions .btn-refresh { background: #138fb0; }
+    .streamer-row .actions .btn-refresh:hover { background: #17a3c9; }
+    .streamer-row .actions .btn-remove { background: #c93a3a; }
+    .streamer-row .actions .btn-remove:hover { background: #e54545; }
+
+    .booster-preview { margin-top: 10px; height: 26px; border-radius: 999px; background: linear-gradient(180deg, #1c1606, #0e0a02); border: 2px solid #7a5a10; position: relative; overflow: hidden; }
+    .booster-preview .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #a06a00, #ffd23f 40%, #ffe98a 60%, #ffd23f 80%, #a06a00); box-shadow: 0 0 14px rgba(255,210,63,.9), inset 0 0 12px rgba(255,255,255,.35); border-radius: 999px; transition: width .35s; }
+    .booster-preview .txt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.95); }
+    .booster-preview.active { border-color: #ffd23f; box-shadow: 0 0 22px rgba(255,210,63,.8), inset 0 0 10px rgba(255,210,63,.4); animation: boosterPulse 1s ease-in-out infinite; }
+    .booster-preview.active .fill { background: linear-gradient(90deg, #ffb300, #ffe14a 50%, #fff3a0 100%); }
+    @keyframes boosterPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.015); } }
+
+    #install-btn { display: none; background: #1fa463; color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font: 700 13px inherit; cursor: pointer; }
+    #install-btn.show { display: inline-block; }
+  </style>
+</head>
+<body>
+<div id="login"><form id="loginForm"><h2 style="color:#c9a6ff">ورود ادمین</h2>
+  <input type="password" id="loginPw" autocomplete="current-password" placeholder="رمز عبور">
+  <div class="row"><button class="green" style="flex:1" id="loginBtn">ورود</button></div>
+  <p id="loginErr" style="color:#ff6b8a;font-size:12px;margin:8px 0 0"></p>
+</form></div>
+
+<header>
+  <div>&#10022; استریم بتل — پنل کنترل</div>
+  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+    <span class="status">منبع: <b id="src-badge">--</b> &nbsp;|&nbsp; نمایش‌ها: <b id="ovl">0</b> &nbsp;|&nbsp; <span id="ws-status">در حال اتصال...</span></span>
+    <button id="install-btn" title="نصب این پنل به‌عنوان اپ">📲 نصب اپ</button>
+    <a href="/add" target="_blank">+ افزودن استریمر</a>
+  </div>
+</header>
+
+<main>
+
+  <section class="wide">
+    <h2>استریمرهای ثبت‌شده <span class="badge" id="st-count">۰</span></h2>
+    <div class="scroll" id="streamer-list" style="max-height: 480px;">
+      <div style="color:#6f6a95;font-size:13px;padding:8px">هنوز استریمری اضافه نشده. روی «+ افزودن استریمر» بزن.</div>
+    </div>
+  </section>
+
+  <!-- =============== BOOSTER =============== -->
+  <section class="wide">
+    <h2>بوستر <span class="badge">ضریب امتیاز</span></h2>
+    <div class="grid3">
+      <div>
+        <label>هدف (امتیاز کل)</label>
+        <input id="bs-target" type="number" value="50000" min="1" step="1">
+      </div>
+      <div>
+        <label>مدت فعال بودن (ثانیه)</label>
+        <input id="bs-duration" type="number" value="60" min="1" step="1">
+      </div>
+      <div>
+        <label>ضریب امتیاز</label>
+        <input id="bs-mult" type="number" value="2" min="2" max="100" step="1">
+      </div>
+    </div>
+    <label>پیش‌نمایش نوار بوستر</label>
+    <div class="booster-preview" id="bs-preview">
+      <div class="fill" id="bs-preview-fill"></div>
+      <div class="txt" id="bs-preview-txt">۰ / ۵۰K</div>
+    </div>
+    <div class="row">
+      <button class="green" onclick="saveBooster()">اعمال تنظیمات بوستر</button>
+      <button class="gold" onclick="startBooster()">🔥 فعال‌سازی دستی بوستر</button>
+      <button class="gray" onclick="resetBooster()">ریست نوار بوستر</button>
+    </div>
+  </section>
+
+  <section class="wide">
+    <h2>منبع چت <span class="badge" id="src-current">aparat</span></h2>
+    <div class="row">
+      <button class="blue" onclick="setSource('aparat')">آپارات</button>
+      <button class="gray" onclick="setSource('demo')">دمو (چت ساختگی)</button>
+      <button class="red" onclick="setSource('youtube')">یوتیوب</button>
+      <button class="gray" onclick="setSource('off')">خاموش (فقط ingest)</button>
+    </div>
+    <div id="aparat-box">
+      <label>آدرس صفحه‌ی لایو آپارات</label>
+      <input id="ap-url" placeholder="https://www.aparat.com/NAME/live" dir="ltr">
+      <div class="grid3" style="margin-top:8px">
+        <div>
+          <label>حالت خواندن</label>
+          <select id="ap-mode">
+            <option value="dom">DOM (سلکتور)</option>
+            <option value="ws">شنود WebSocket</option>
+          </select>
+        </div>
+        <div>
+          <label>Warm-up (ثانیه)</label>
+          <input id="ap-warm" type="number" value="5" min="0">
+        </div>
+        <div>
+          <label>Headless</label>
+          <input id="ap-headless" type="checkbox" checked>
+        </div>
+      </div>
+      <label>سلکتور پیام</label>
+      <input id="ap-msgs" placeholder=".message, .ruby-message" dir="ltr">
+      <label>سلکتور نام کاربر</label>
+      <input id="ap-user" placeholder=".message__username, a.channel" dir="ltr">
+      <label>سلکتور متن پیام</label>
+      <input id="ap-text" placeholder=".message__text, .details-box > .ruby-message" dir="ltr">
+      <label>WebSocket URL contains (فقط حالت ws)</label>
+      <input id="ap-wsfilter" placeholder="chat" dir="ltr">
+      <div class="row">
+        <label style="display:flex;align-items:center;gap:6px;margin:0"><input id="ap-debug" type="checkbox"> لاگ دیباگ</label>
+        <button class="cyan" onclick="saveAparat()">ذخیره تنظیمات آپارات</button>
+        <button class="gray" onclick="window.open('/userscript.user.js','_blank')">دریافت یوزراسکریپت</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>شبیه‌سازی یک بیننده</h2>
+    <label>نام بیننده</label><input id="sim-user" value="TestViewer" dir="auto">
+    <label>متن پیام</label>
+    <input id="sim-text" value="بندیت" dir="auto">
+    <label>استریمر (وقتی متن پیام اسم استریمر ندارد)</label>
+    <select id="sim-streamer"></select>
+    <div class="row">
+      <button onclick="sim('text')">ارسال چت</button>
+      <button class="blue" onclick="sim('ruby')">هدیه‌ی روبی</button>
+      <button class="cyan" onclick="sim('member')">عضو جدید</button>
+    </div>
+    <label>تعداد روبی</label><input id="sim-ruby" type="number" value="5" min="1">
+  </section>
+
+  <section>
+    <h2>گوینده</h2>
+    <label>متن برای گفتن</label>
+    <textarea id="say-text" rows="2">به استریم بتل خوش آمدید! اسم استریمرت رو تو چت بنویس تا امتیاز بگیره!</textarea>
+    <div class="row">
+      <button onclick="say()">بگو</button>
+      <button id="mute-btn" class="red" onclick="toggleMute()">بی‌صدا کردن گوینده</button>
+      <button class="gray" onclick="clearQueue()">خالی کردن صف</button>
+    </div>
+    <label>صدای انگلیسی</label>
+    <select id="voice-en">
+      <option value="en-US-AndrewMultilingualNeural">Andrew</option>
+      <option value="en-US-GuyNeural">Guy</option>
+      <option value="en-US-AriaNeural">Aria</option>
+      <option value="en-US-JennyNeural">Jenny</option>
+    </select>
+    <label>صدای فارسی</label>
+    <select id="voice-fa">
+      <option value="fa-IR-FaridNeural">فرید (مرد)</option>
+      <option value="fa-IR-DilaraNeural">دلارا (زن)</option>
+    </select>
+    <div class="row">
+      <button class="cyan" onclick="saveVoices()">اعمال صداها</button>
+      <button class="gray" onclick="testVoice()">تست صدا</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>تنظیم امتیاز</h2>
+    <div class="grid3">
+      <div>
+        <label>استریمر</label>
+        <select id="add-streamer"></select>
+      </div>
+      <div>
+        <label>± امتیاز</label><input id="add-pts" type="number" value="100">
+      </div>
+      <div>
+        <label>مقدار دقیق</label><input id="set-pts" type="number" value="1000">
+      </div>
+    </div>
+    <div class="row">
+      <button class="green" onclick="addPts()">کم / زیاد کن</button>
+      <button class="cyan" onclick="setPts()">مقدار دقیق بگذار</button>
+    </div>
+    <div class="row">
+      <button class="orange" onclick="undo()">بازگرداندن آخرین رأی</button>
+      <button id="pause-btn" class="gray" onclick="togglePause()">توقف بازی</button>
+      <button class="red" onclick="if (confirm('همه‌ی امتیازها و بیننده‌ها صفر شوند؟')) post('/api/reset', {}, 'بازی ریست شد')">ریست بازی</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>تنظیمات زنده</h2>
+    <label>فاصله‌ی بین دو رأی هر کاربر (ثانیه) <span class="range-val" id="v-cool">۰</span></label>
+    <input type="range" id="s-cool" min="0" max="30" step="0.5" value="0" oninput="document.getElementById('v-cool').textContent = this.value">
+    <label>امتیاز عضو جدید <span class="range-val" id="v-mem">۴۰۰</span></label>
+    <input type="range" id="s-mem" min="50" max="2000" step="50" value="400" oninput="document.getElementById('v-mem').textContent = this.value">
+    <label>آستانه‌ی آتیش گرفتن <span class="range-val" id="v-fire">۲۵</span></label>
+    <input type="range" id="s-fire" min="5" max="200" step="5" value="25" oninput="document.getElementById('v-fire').textContent = this.value">
+    <label>فاصله‌ی اعلام جدول (دقیقه، ۰=خاموش) <span class="range-val" id="v-std">۵</span></label>
+    <input type="range" id="s-std" min="0" max="30" step="1" value="5" oninput="document.getElementById('v-std').textContent = this.value">
+    <label>فاصله‌ی یادآوری (دقیقه، ۰=خاموش) <span class="range-val" id="v-rem">۷</span></label>
+    <input type="range" id="s-rem" min="0" max="30" step="1" value="7" oninput="document.getElementById('v-rem').textContent = this.value">
+    <label>رمز ادمین</label>
+    <input id="admin-pw" type="password" placeholder="برای تغییر ندادن، خالی بگذار">
+    <div class="row"><button class="green" onclick="saveSettings()">اعمال تنظیمات</button></div>
+  </section>
+
+  <section>
+    <h2>وضعیت زنده</h2>
+    <div id="stats"></div>
+    <table id="top"><thead><tr><th>#</th><th>استریمر</th><th>امتیاز</th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <section>
+    <h2>برترین چت‌کننده‌ها <span class="badge">برای بن کردن کلیک کن</span></h2>
+    <div class="scroll"><table id="chatters"><thead><tr><th>نام</th><th>امتیاز</th><th>لِوِل</th><th>چت‌ها</th><th></th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>امتیازهای معلق</h2>
+    <div class="scroll"><table id="pending"><thead><tr><th>نام</th><th>امتیاز</th><th>نوع</th><th>زمان باقی‌مانده</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>تاریخچه‌ی رأی‌ها <span class="badge">۲۰ مورد آخر</span></h2>
+    <div class="scroll"><table id="history"><thead><tr><th>زمان</th><th>کاربر</th><th>استریمر</th><th>امتیاز</th><th>نوع</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>تایم‌لاین رویدادها <span class="badge">۵۰ مورد آخر</span></h2>
+    <div class="scroll" id="events"></div>
+  </section>
+
+  <section>
+    <h2>دستاوردها</h2>
+    <div class="scroll" id="achievements"></div>
+    <div class="row"><button class="red" onclick="if(confirm('همه‌ی دستاوردها پاک شوند؟')) post('/api/clear_achievements', {}, 'پاک شد')">پاک کردن همه</button></div>
+  </section>
+
+  <section>
+    <h2>استریمرهای بدون امتیاز <span class="badge" id="zero-count">۰</span></h2>
+    <div class="scroll" id="zero-list" style="font-size:13px;color:#9b96c4;"></div>
+  </section>
+
+</main>
+<div id="toast"></div>
+
+<script>
+var muted = false, paused = false;
+var ws = null, wsRetry = 0;
+var loginPending = false;
+var currentSource = 'aparat';
+var streamers = [];
+var booster = { progress: '0', target: '50000', active: false, left: 0, duration: 60, multiplier: 2 };
+var deferredInstall = null;
+
+/* ---------- PWA install ---------- */
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  deferredInstall = e;
+  var btn = document.getElementById('install-btn');
+  if (btn) btn.classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click', function () {
+  var btn = document.getElementById('install-btn');
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(function (choice) {
+      if (choice && choice.outcome === 'accepted') {
+        btn.classList.remove('show');
+      }
+      deferredInstall = null;
+    });
+  } else {
+    alert('اگر گزینه‌ی نصب نمایش داده نمی‌شود:\n' +
+          '• از منوی سه‌نقطه‌ی کروم، «Install» یا «نصب برنامه» را انتخاب کن\n' +
+          '• یا از منوی «More tools → Create shortcut» و تیک «Open as window» بزن');
+  }
+});
+window.addEventListener('appinstalled', function () {
+  var btn = document.getElementById('install-btn');
+  if (btn) btn.classList.remove('show');
+});
+
+/* ---------- register service worker ---------- */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/sw.js').catch(function (e) {
+    console.warn('SW registration failed:', e);
+  });
+}
+
+function faNum(n) {
+  return String(n).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[+d]; });
+}
+function fmtShort(n) {
+  var v = Number(n) || 0;
+  if (v >= 1e12) return (v / 1e12).toFixed(1).replace(/\.0$/, '') + 'T';
+  if (v >= 1e9) return (v / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (v >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+  return String(v);
+}
+function toast(t, err) {
+  var e = document.getElementById('toast');
+  e.textContent = t; e.className = 'show' + (err ? ' err' : '');
+  setTimeout(function () { e.className = ''; }, 2000);
+}
+function post(url, body, msg) {
+  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function (r) {
+      if (r.status === 401) { needLogin(); throw new Error('401'); }
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    })
+    .then(function (j) { if (msg) toast(msg); return j; })
+    .catch(function (e) { if (e.message !== '401') toast('ناموفق: ' + e.message, true); });
+}
+function v(id) { return document.getElementById(id).value; }
+function checked(id) { return document.getElementById(id).checked; }
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function fmtTime(ts) { if (!ts) return ''; var d = new Date(ts * 1000); return d.toTimeString().slice(0, 8); }
+
+function setSource(src) { post('/api/settings', { source: src }, 'منبع: ' + src); }
+function saveAparat() {
+  post('/api/settings', {
+    aparat_channel_url: v('ap-url'),
+    aparat_mode: v('ap-mode'),
+    aparat_warmup_seconds: Number(v('ap-warm')),
+    aparat_headless: checked('ap-headless'),
+    aparat_message_selector: v('ap-msgs'),
+    aparat_user_selector: v('ap-user'),
+    aparat_text_selector: v('ap-text'),
+    aparat_ws_url_filter: v('ap-wsfilter'),
+    aparat_debug: checked('ap-debug')
+  }, 'تنظیمات آپارات ذخیره شد');
+}
+function saveBooster() {
+  var t = Number(v('bs-target')) || 50000;
+  var d = Number(v('bs-duration')) || 60;
+  var m = Number(v('bs-mult')) || 2;
+  if (t < 1) { toast('هدف باید حداقل ۱ باشد', true); return; }
+  if (d < 1) { toast('مدت باید حداقل ۱ ثانیه باشد', true); return; }
+  if (m < 2) { toast('ضریب باید حداقل ۲ باشد', true); return; }
+  post('/api/settings', {
+    booster_target: t,
+    booster_duration: d,
+    booster_multiplier: m
+  }, 'تنظیمات بوستر اعمال شد').then(refreshBooster);
+}
+function startBooster() {
+  post('/api/booster', { action: 'start' }, 'بوستر فعال شد!').then(refreshBooster);
+}
+function resetBooster() {
+  post('/api/booster', { action: 'reset' }, 'نوار بوستر ریست شد').then(refreshBooster);
+}
+function refreshBooster() {
+  fetch('/api/state').then(function (r) { return r.json(); }).then(function (s) {
+    if (s && s.booster) { booster = s.booster; renderBoosterPreview(); }
+  }).catch(function () {});
+}
+function renderBoosterPreview() {
+  var b = booster;
+  var preview = document.getElementById('bs-preview');
+  var fill = document.getElementById('bs-preview-fill');
+  var txt = document.getElementById('bs-preview-txt');
+  var prog = Number(b.progress) || 0;
+  var tgt = Number(b.target) || 50000;
+  if (b.active) {
+    var left = Number(b.left) || 0;
+    var dur = Number(b.duration) || 60;
+    var ratio = dur > 0 ? left / dur : 0;
+    fill.style.width = (ratio * 100).toFixed(1) + '%';
+    txt.textContent = '🔥 بوستر فعال — ' + Math.ceil(left) + ' ثانیه (×' + b.multiplier + ')';
+    preview.classList.add('active');
+  } else {
+    var ratio2 = tgt > 0 ? Math.min(1, prog / tgt) : 0;
+    fill.style.width = (ratio2 * 100).toFixed(1) + '%';
+    txt.textContent = fmtShort(prog) + ' / ' + fmtShort(tgt) + ' (' + Math.floor(ratio2 * 100) + '٪)';
+    preview.classList.remove('active');
+  }
+}
+setInterval(renderBoosterPreview, 400);
+
+function sim(kind) {
+  var body = { user: v('sim-user'), text: v('sim-text'), kind: kind };
+  if (kind === 'ruby') body.ruby = Number(v('sim-ruby'));
+  post('/api/simulate', body, 'ارسال شد');
+}
+function say() { post('/api/say', { text: v('say-text') }, 'در صف قرار گرفت'); }
+function toggleMute() { post('/api/mute', { muted: !muted }, muted ? 'صدا روشن شد' : 'صدا بی‌صدا شد'); }
+function clearQueue() { post('/api/clear_queue', {}, 'صف خالی شد'); }
+function saveVoices() { post('/api/voice', { voice_en: v('voice-en'), voice_fa: v('voice-fa') }, 'صداها به‌روز شدند'); }
+function testVoice() { post('/api/test_voice', { text: v('say-text') || 'تست صدا' }, 'در حال تست صدا'); }
+function addPts() { post('/api/add', { code: v('add-streamer'), points: Number(v('add-pts')) }, 'امتیاز به‌روز شد'); }
+function setPts() { post('/api/set_points', { code: v('add-streamer'), points: Number(v('set-pts')) }, 'امتیاز ثبت شد'); }
+function undo() { post('/api/undo', {}, 'آخرین رأی برگشت خورد'); }
+function togglePause() { post('/api/pause', { paused: !paused }, paused ? 'ادامه' : 'متوقف شد'); }
+function saveSettings() {
+  var patch = {
+    user_cooldown: Number(v('s-cool')),
+    member_points: Number(v('s-mem')),
+    fire_points: Number(v('s-fire')),
+    standings_minutes: Number(v('s-std')),
+    reminder_minutes: Number(v('s-rem'))
+  };
+  var pw = v('admin-pw');
+  if (pw) patch.admin_password = pw;
+  post('/api/settings', patch, 'تنظیمات اعمال شد');
+}
+function banUser(uid, banned) { post('/api/ban', { uid: uid, banned: banned }, banned ? 'بن شد' : 'آن‌بن شد'); }
+
+function refreshStreamers() {
+  fetch('/api/streamers').then(function (r) { return r.json(); }).then(function (j) {
+    streamers = j.streamers || [];
+    renderStreamerList();
+    renderStreamerSelects();
+  }).catch(function () {});
+}
+function renderStreamerList() {
+  var box = document.getElementById('streamer-list');
+  if (!streamers.length) {
+    box.innerHTML = '<div style="color:#6f6a95;font-size:13px;padding:8px">هنوز استریمری اضافه نشده. روی «+ افزودن استریمر» بزن.</div>';
+    document.getElementById('st-count').textContent = '۰';
+    return;
+  }
+  document.getElementById('st-count').textContent = faNum(streamers.length);
+  box.innerHTML = streamers.map(function (s) {
+    var letter = esc((s.display || s.username || '?').slice(0,1).toUpperCase());
+    var pic = s.pic_src
+      ? '<img src="' + esc(s.pic_src) + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'">'
+        + '<div class="pic-fallback" style="display:none">' + letter + '</div>'
+      : '<div class="pic-fallback">' + letter + '</div>';
+    var kw = (s.keywords || []).join(' · ') || '—';
+    return '<div class="streamer-row" data-u="' + esc(s.username) + '">' +
+      pic +
+      '<div class="info">' +
+        '<div class="name">' + esc(s.display || s.username) + '</div>' +
+        '<div class="uname">@' + esc(s.username) + '</div>' +
+        '<div class="kws">کلمات حساس: ' + esc(kw) + '</div>' +
+      '</div>' +
+      '<div class="pts">' + faNum(s.score) + '</div>' +
+      '<div class="actions">' +
+        '<button class="btn-refresh" onclick="refreshPic(\'' + esc(s.username).replace(/'/g, "\\'") + '\')" title="بروزرسانی عکس پروفایل">↻ عکس</button>' +
+        '<button class="btn-remove" onclick="removeStreamer(\'' + esc(s.username).replace(/'/g, "\\'") + '\', \'' + esc((s.display || s.username).replace(/'/g, "\\'")) + '\')" title="حذف استریمر">✕ حذف</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function renderStreamerSelects() {
+  ['sim-streamer', 'add-streamer'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var old = el.value;
+    el.innerHTML = streamers.map(function (s) {
+      return '<option value="' + esc(s.username) + '">' + esc(s.display || s.username) + ' (@' + esc(s.username) + ')</option>';
+    }).join('');
+    if (old) el.value = old;
+  });
+}
+function refreshPic(username) {
+  toast('در حال بروزرسانی عکس...');
+  post('/api/streamers/update', { username: username, refresh_pic: true }, 'عکس به‌روز شد').then(refreshStreamers);
+}
+function removeStreamer(username, display) {
+  if (!confirm('استریمر «' + (display || username) + '» حذف شود؟')) return;
+  post('/api/streamers/remove', { username: username }, 'حذف شد').then(refreshStreamers);
+}
+
+function render(s) {
+  muted = s.muted; paused = s.paused;
+  document.getElementById('mute-btn').textContent = muted ? 'روشن کردن گوینده' : 'بی‌صدا کردن گوینده';
+  document.getElementById('pause-btn').textContent = paused ? 'ادامه‌ی بازی' : 'توقف بازی';
+  document.getElementById('ovl').textContent = faNum(s.overlays);
+  currentSource = (s.settings && s.settings.source) || 'aparat';
+  document.getElementById('src-badge').textContent = currentSource;
+  var sc = document.getElementById('src-current');
+  sc.textContent = currentSource;
+  sc.className = 'source-tag ' + currentSource;
+
+  document.getElementById('stats').innerHTML =
+    '<span class="stat">پیام‌ها <b>' + faNum(s.stats.messages) + '</b></span>' +
+    '<span class="stat">رأی‌ها <b>' + faNum(s.stats.votes) + '</b></span>' +
+    '<span class="stat">روبی‌ها <b>' + faNum(s.stats.rubies || 0) + '</b></span>' +
+    '<span class="stat">عضوها <b>' + faNum(s.stats.members) + '</b></span>' +
+    '<span class="stat">گوینده <b>' + esc(s.tts_engine) + '</b></span>' +
+    (paused ? '<span class="stat" style="color:#ff9b9b"><b>متوقف</b></span>' : '');
+
+  document.querySelector('#top tbody').innerHTML = s.top_countries.map(function (c, i) {
+    return '<tr><td>' + faNum(i + 1) + '</td><td>' + esc(c.name) + '</td><td>' + faNum(c.points) + '</td></tr>';
+  }).join('');
+
+  document.querySelector('#chatters tbody').innerHTML = s.top_chatters.map(function (u) {
+    var isBanned = s.banned.indexOf(u.id) >= 0;
+    return '<tr>' +
+      '<td>' + esc(u.name) + (isBanned ? ' <span class="pill danger">بن</span>' : '') + '</td>' +
+      '<td>' + faNum(u.points) + '</td>' +
+      '<td>' + faNum(u.level) + '</td>' +
+      '<td>' + faNum(u.chats) + '</td>' +
+      '<td><button class="' + (isBanned ? 'green' : 'red') + '" style="padding:4px 8px;font-size:11px" onclick="banUser(\'' + u.id.replace(/'/g, "\\'") + '\',' + (!isBanned) + ')">' + (isBanned ? 'آن‌بن' : 'بن') + '</button></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="5" style="color:#6f6a95">هنوز کسی چت نکرده</td></tr>';
+
+  document.querySelector('#pending tbody').innerHTML = s.pending.map(function (p) {
+    return '<tr><td>' + esc(p.name) + '</td><td>' + faNum(p.points) + '</td><td><span class="pill ' + (p.kind === 'ruby' ? 'ruby' : '') + '">' + esc(p.kind) + '</span></td><td>' + faNum(p.until) + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="color:#6f6a95">چیزی معلق نیست</td></tr>';
+
+  document.querySelector('#history tbody').innerHTML = s.history.map(function (h) {
+    var kindPill = h.kind === 'ruby' ? '<span class="pill ruby">روبی</span>' : esc(h.kind);
+    return '<tr><td>' + fmtTime(h.ts) + '</td><td>' + esc(h.user) + '</td><td>' + esc(h.name || h.code) + '</td><td>+' + faNum(h.pts) + '</td><td>' + kindPill + '</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="color:#6f6a95">هنوز رأیی ثبت نشده</td></tr>';
+
+  document.getElementById('events').innerHTML = s.events.slice().reverse().map(function (e) {
+    return '<div class="ev ' + esc(e.kind) + '">' + esc(e.text || '') + '<span class="t">' + fmtTime(e.ts) + '</span></div>';
+  }).join('') || '<div style="color:#6f6a95;font-size:12px;">هنوز رویدادی نیست</div>';
+
+  document.getElementById('achievements').innerHTML = s.achievements.map(function (a) {
+    return '<div class="ev achievement">' + esc(a.title) + ' &mdash; <b>' + esc(a.who) + '</b></div>';
+  }).join('') || '<div style="color:#6f6a95;font-size:12px;">هنوز دستاوردی باز نشده</div>';
+
+  document.getElementById('zero-count').textContent = faNum(s.zero_countries.length);
+  document.getElementById('zero-list').textContent = s.zero_countries.map(function (c) { return c.name || c.code; }).join('، ') || '—';
+
+  if (s.booster) { booster = s.booster; renderBoosterPreview(); }
+
+  var st = s.settings || {};
+  if (document.activeElement.tagName !== 'INPUT' || document.activeElement.type !== 'range') {
+    setRange('s-cool', st.user_cooldown);
+    setRange('s-mem', st.member_points);
+    setRange('s-fire', st.fire_points);
+    setRange('s-std', st.standings_minutes);
+    setRange('s-rem', st.reminder_minutes);
+    if (document.activeElement !== document.getElementById('bs-target')) {
+      document.getElementById('bs-target').value = st.booster_target || 50000;
+    }
+    if (document.activeElement !== document.getElementById('bs-duration')) {
+      document.getElementById('bs-duration').value = st.booster_duration || 60;
+    }
+    if (document.activeElement !== document.getElementById('bs-mult')) {
+      document.getElementById('bs-mult').value = st.booster_multiplier || 2;
+    }
+    if (document.activeElement !== document.getElementById('ap-url')) document.getElementById('ap-url').value = st.aparat_channel_url || '';
+    if (document.activeElement !== document.getElementById('ap-mode')) document.getElementById('ap-mode').value = st.aparat_mode || 'dom';
+    if (document.activeElement !== document.getElementById('ap-warm')) document.getElementById('ap-warm').value = st.aparat_warmup_seconds || 5;
+    document.getElementById('ap-headless').checked = !!st.aparat_headless;
+    document.getElementById('ap-debug').checked = !!st.aparat_debug;
+    if (document.activeElement !== document.getElementById('ap-msgs')) document.getElementById('ap-msgs').value = st.aparat_message_selector || '';
+    if (document.activeElement !== document.getElementById('ap-user')) document.getElementById('ap-user').value = st.aparat_user_selector || '';
+    if (document.activeElement !== document.getElementById('ap-text')) document.getElementById('ap-text').value = st.aparat_text_selector || '';
+    if (document.activeElement !== document.getElementById('ap-wsfilter')) document.getElementById('ap-wsfilter').value = st.aparat_ws_url_filter || '';
+  }
+  document.getElementById('aparat-box').style.opacity = (currentSource === 'aparat') ? '1' : '0.55';
+
+  if (!render._lastStreamers || Date.now() - render._lastStreamers > 5000) {
+    render._lastStreamers = Date.now();
+    refreshStreamers();
+  }
+}
+function setRange(id, val) {
+  if (val == null) return;
+  var el = document.getElementById(id);
+  if (!el || document.activeElement === el) return;
+  el.value = val;
+  var label = document.getElementById(id.replace('s-', 'v-'));
+  if (label) label.textContent = faNum(val);
+}
+
+function needLogin() {
+  if (loginPending) return;
+  loginPending = true;
+  document.getElementById('login').classList.add('on');
+}
+document.getElementById('loginForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var pw = document.getElementById('loginPw').value;
+  fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) })
+    .then(function (r) {
+      if (r.ok) {
+        sessionStorage.setItem('sb_pw', pw);
+        document.getElementById('login').classList.remove('on');
+        loginPending = false;
+        document.getElementById('loginErr').textContent = '';
+      } else {
+        document.getElementById('loginErr').textContent = 'رمز اشتباه است';
+      }
+    });
+});
+
+function connectWS() {
+  var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(proto + '//' + location.host + '/ws/admin');
+  ws.onopen = function () { document.getElementById('ws-status').innerHTML = '<b>متصل</b>'; wsRetry = 0; };
+  ws.onmessage = function (ev) { try { render(JSON.parse(ev.data)); } catch (e) { console.error(e); } };
+  ws.onclose = function () {
+    document.getElementById('ws-status').textContent = 'در حال اتصال مجدد...';
+    wsRetry = Math.min(wsRetry + 1, 6);
+    setTimeout(connectWS, 1000 * wsRetry);
+  };
+  ws.onerror = function () { try { ws.close(); } catch (e) {} };
+}
+
+connectWS();
+refreshStreamers();
+refreshBooster();
+</script>
+</body>
+</html>

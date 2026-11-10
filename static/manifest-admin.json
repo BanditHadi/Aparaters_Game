@@ -1,0 +1,33 @@
+{
+  "name": "Streamer Boost — پنل کنترل",
+  "short_name": "کنترل",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0a1f",
+  "theme_color": "#34196e",
+  "description": "پنل کنترل بازی استریم بتل",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

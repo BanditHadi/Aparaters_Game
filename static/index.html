@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>استریم بتل — نمایش</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@500;600;700;800;900&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="viewport">
+    <div id="stage">
+      <div class="bg-fx" id="stars"></div>
+
+      <header class="title"><span class="spark">&#10022;</span><span class="title-text" id="title-text">استریمرت رو ببر بالا</span><span class="spark">&#10022;</span></header>
+
+      <section class="actions">
+        <div class="card card-comment">
+          <svg class="card-ic" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 6C16.5 6 4 16.2 4 28.8c0 6.2 3 11.8 8 15.9-.4 4.2-2.2 8.2-5.6 11.6 6.1-.3 11.2-2.6 14.6-5.4 3.4 1 7 1.5 11 1.5 15.5 0 28-10.2 28-22.8S47.500 6 32 6z" fill="#fff"/>
+            <circle cx="20" cy="29" r="3.600" fill="#1a1a2e"/><circle cx="32" cy="29" r="3.600" fill="#1a1a2e"/><circle cx="44" cy="29" r="3.600" fill="#1a1a2e"/>
+          </svg>
+          <div class="card-txt">
+            <div class="card-top">هر کامنت +۱</div>
+            <div class="card-sub">لِوِل <b id="lv-max">۵</b> +<b id="lv-pts">۵</b> امتیاز</div>
+          </div>
+        </div>
+        <div class="card card-bonus">
+          <svg class="card-ic ruby" viewBox="0 0 64 64" aria-hidden="true">
+            <defs><linearGradient id="card-ruby-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fa8ff"/><stop offset="1" stop-color="#0052b3"/></linearGradient></defs>
+            <polygon points="32,58 4,24 14,8 50,8 60,24" fill="url(#card-ruby-g)" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+            <polyline points="4,24 60,24 32,58 14,8 24,24 32,8 40,24 50,8" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <div class="card-txt flipper" id="bonus-flip">
+            <div class="flip-item show"><div class="card-top light">هدیه‌ی روبی</div><div class="card-sub cyan" id="bonus-ruby">هر ۱ &#128142; = +۲ امتیاز</div></div>
+            <div class="flip-item"><div class="card-top light">عضو جدید</div><div class="card-sub cyan" id="bonus-mem">+۴۰۰ امتیاز</div></div>
+            <div class="flip-item"><div class="card-top light">اسم استریمر رو بنویس</div><div class="card-sub cyan">Bandit &middot; بندیت &middot; هادی</div></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="line-pink"></div>
+      <div id="ticker"></div>
+      <div class="line-cyan"></div>
+
+      <section id="chatters">
+        <div class="ch-head"><span class="ch-title">برترین چت‌کننده‌ها</span><span class="ch-top5">۱۰ نفر برتر</span></div>
+        <div id="chatter-row"><div class="ch-empty" id="ch-empty">اولین نفری باش که امتیاز می‌ده!</div></div>
+      </section>
+
+      <section id="booster">
+        <div class="booster-track">
+          <div class="booster-fill" id="booster-fill"></div>
+          <div class="booster-glow" id="booster-glow"></div>
+          <div class="booster-text" id="booster-text">۰ / ۵۰K</div>
+        </div>
+      </section>
+
+      <section id="board"><div id="grid"></div></section>
+
+      <div id="banner" class="banner"></div>
+      <div id="splash"></div>
+      <div id="caption"><span class="eq"><i></i><i></i><i></i><i></i></span><span id="caption-text"></span></div>
+    </div>
+  </div>
+
+  <canvas id="fx"></canvas>
+  <button id="sound-btn" type="button">&#128266; برای فعال‌سازی صدا یک بار کلیک کن</button>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

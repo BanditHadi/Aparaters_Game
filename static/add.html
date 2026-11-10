@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>استریم بتل — افزودن استریمر</title>
+  <link rel="manifest" href="/static/manifest-add.json">
+  <meta name="theme-color" content="#34196e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="افزودن استریمر">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="icon" type="image/png" href="/static/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #0b0a1f; color: #eee;
+      font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+      background-image:
+        radial-gradient(60% 40% at 80% 0%, rgba(122,92,255,.25), transparent),
+        radial-gradient(50% 40% at 0% 100%, rgba(255,45,154,.15), transparent);
+    }
+    header { padding: 18px 24px; background: linear-gradient(90deg, #34196e, #0c3b66); font-weight: 800; font-size: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    header a { color: #9ecbff; text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid #3d7dff; border-radius: 8px; }
+    header a:hover { background: #1a3a6b; }
+    header .install-wrap { display: flex; align-items: center; gap: 8px; }
+    main { max-width: 780px; margin: 30px auto; padding: 0 20px 60px; }
+    .panel { background: #15122e; border: 1px solid #2d2860; border-radius: 16px; padding: 22px; margin-bottom: 18px; }
+    h2 { margin: 0 0 18px; font-size: 18px; color: #c9a6ff; }
+    label { display: block; font-size: 12px; color: #9b96c4; margin: 14px 0 4px; font-weight: 700; letter-spacing: .5px; }
+    input, textarea { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid #3a3470; background: #0d0b22; color: #fff; font: inherit; font-size: 14px; }
+    input:focus, textarea:focus { outline: 2px solid #5b45e6; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    button { cursor: pointer; border: 0; border-radius: 10px; padding: 11px 18px; font: 700 13px inherit; color: #fff; background: #5b45e6; transition: filter .15s; }
+    button:hover { filter: brightness(1.15); }
+    button.green { background: #1fa463; } button.cyan { background: #138fb0; } button.gray { background: #3a3470; } button.blue { background: #0052b3; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .hint { font-size: 12px; color: #7a76a8; margin-top: 4px; }
+    .kw-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; min-height: 30px; padding: 8px; border-radius: 10px; background: #0d0b22; border: 1px dashed #3a3470; }
+    .kw { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #2c1f55; border: 1px solid #5b45e6; color: #d9b6ff; font-size: 13px; font-weight: 700; }
+    .kw button { background: transparent; border: 0; color: #ff8ab8; font-weight: 900; padding: 0; font-size: 14px; cursor: pointer; }
+    .kw-empty { color: #6f6a95; font-size: 12px; align-self: center; }
+    #preview { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 12px; border-radius: 12px; background: #0d0b22; border: 1px solid #25205a; min-height: 78px; }
+    #preview .pic { width: 60px; height: 60px; border-radius: 12px; overflow: hidden; background: #3a3470; display: grid; place-items: center; flex: none; }
+    #preview .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #preview .pic .fb { font-size: 26px; font-weight: 900; color: #fff; }
+    #preview .info { flex: 1; min-width: 0; }
+    #preview .nm { font-size: 16px; font-weight: 800; }
+    #preview .un { color: #9b96c4; font-size: 12px; direction: ltr; }
+    #toast { position: fixed; left: 18px; bottom: 18px; background: #1fa463; padding: 12px 18px; border-radius: 10px; opacity: 0; transition: .3s; font-weight: 700; z-index: 100; }
+    #toast.show { opacity: 1; } #toast.err { background: #c93a3a; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; margin-left: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+    .added { background: #0d2a1a; border: 1px solid #1fa463; padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 13px; line-height: 1.9; }
+    #install-btn { display: none; background: #1fa463; color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font: 700 13px inherit; cursor: pointer; }
+    #install-btn.show { display: inline-block; }
+  </style>
+</head>
+<body>
+<header>
+  <div>&#10022; افزودن استریمر جدید</div>
+  <div class="install-wrap">
+    <button id="install-btn" title="نصب این پنل به‌عنوان اپ">📲 نصب اپ</button>
+    <a href="/admin">&rarr; بازگشت به پنل کنترل</a>
+  </div>
+</header>
+
+<main>
+
+  <div class="panel">
+    <h2>کانال آپارات</h2>
+
+    <label>نام کاربری آپارات</label>
+    <div class="row" style="margin-top: 6px; flex-wrap: nowrap;">
+      <input id="username" placeholder="bandit.hadi" dir="ltr" autocomplete="off">
+      <button class="blue" id="lookupBtn" style="flex: none;">جستجو</button>
+    </div>
+    <div class="hint">نام کاربری دقیق آپارات (بخشی که بعد از <code style="background:#0d0b22;padding:1px 5px;border-radius:4px">aparat.com/</code> می‌آید).</div>
+
+    <div id="preview" class="hidden">
+      <div class="pic" id="prev-pic"></div>
+      <div class="info">
+        <div class="nm" id="prev-name">—</div>
+        <div class="un" id="prev-un">—</div>
+      </div>
+    </div>
+
+    <label>نام نمایشی</label>
+    <input id="display" placeholder="بندیت" dir="auto">
+    <div class="hint">زیر عکس پروفایل در نمایش نشان داده می‌شود. خالی بگذاری، از نام کانال آپارات استفاده می‌شود. <b>این نام به‌طور خودکار به کلمات حساس اضافه می‌شود.</b></div>
+
+    <label>امتیاز اولیه</label>
+    <input id="initial-score" type="number" value="0" min="0">
+    <div class="hint">امتیاز شروع برای این استریمر. اگر می‌خواهی از صفر شروع کند، ۰ بگذار.</div>
+  </div>
+
+  <div class="panel">
+    <h2>کلمات حساس</h2>
+    <div class="hint" style="margin-top:0">کلماتی که با نوشتنشان در چت آپارات، به این استریمر امتیاز داده می‌شود. به بزرگ/کوچک بودن حروف حساس نیست. نام نمایشی <b>همیشه</b> به‌طور خودکار جزو کلمات حساس است.</div>
+
+    <div class="row" style="margin-top: 12px; flex-wrap: nowrap;">
+      <input id="kw-input" placeholder="یک کلمه بنویس و Enter بزن..." dir="auto">
+      <button class="cyan" id="kw-add" style="flex: none;">افزودن</button>
+    </div>
+
+    <div class="kw-list" id="kw-list">
+      <span class="kw-empty">هنوز کلمه‌ای اضافه نشده.</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="row" style="margin-top:0">
+      <button class="green" id="saveBtn" style="flex: 1; padding: 14px;">+ افزودن به بازی</button>
+      <button class="gray" id="resetBtn">پاک کردن فرم</button>
+    </div>
+    <div id="added" class="added hidden"></div>
+  </div>
+
+</main>
+<div id="toast"></div>
+
+<script>
+var keywords = [];
+var lastLookup = null;
+var deferredInstall = null;
+
+/* ---------- PWA install ---------- */
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  deferredInstall = e;
+  var btn = document.getElementById('install-btn');
+  if (btn) btn.classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click', function () {
+  var btn = document.getElementById('install-btn');
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(function (choice) {
+      if (choice && choice.outcome === 'accepted') {
+        btn.classList.remove('show');
+      }
+      deferredInstall = null;
+    });
+  } else {
+    alert('اگر گزینه‌ی نصب نمایش داده نمی‌شود:\n' +
+          '• از منوی سه‌نقطه‌ی کروم، «Install» یا «نصب برنامه» را انتخاب کن\n' +
+          '• یا از منوی «More tools → Create shortcut» و تیک «Open as window» بزن');
+  }
+});
+window.addEventListener('appinstalled', function () {
+  var btn = document.getElementById('install-btn');
+  if (btn) btn.classList.remove('show');
+});
+
+/* ---------- register service worker ---------- */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/sw.js').catch(function (e) {
+    console.warn('SW registration failed:', e);
+  });
+}
+
+var $ = function (id) { return document.getElementById(id); };
+function toast(t, err) {
+  var e = $('toast');
+  e.textContent = t; e.className = 'show' + (err ? ' err' : '');
+  setTimeout(function () { e.className = ''; }, 2400);
+}
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function initialLetter(name) {
+  var s = String(name || '?').trim();
+  return (Array.from(s)[0] || '?').toUpperCase();
+}
+
+function renderKeywords() {
+  var box = $('kw-list');
+  if (!keywords.length) {
+    box.innerHTML = '<span class="kw-empty">هنوز کلمه‌ای اضافه نشده.</span>';
+    return;
+  }
+  box.innerHTML = keywords.map(function (k, i) {
+    return '<span class="kw">' + esc(k) +
+      ' <button title="حذف" onclick="removeKeyword(' + i + ')">✕</button></span>';
+  }).join('');
+}
+function addKeyword() {
+  var inp = $('kw-input');
+  var v = String(inp.value || '').trim();
+  if (!v) return;
+  if (keywords.indexOf(v) >= 0) { inp.value = ''; return; }
+  keywords.push(v);
+  inp.value = '';
+  inp.focus();
+  renderKeywords();
+}
+function removeKeyword(i) { keywords.splice(i, 1); renderKeywords(); }
+$('kw-add').onclick = addKeyword;
+$('kw-input').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') { e.preventDefault(); addKeyword(); }
+  if (e.key === 'Backspace' && !this.value && keywords.length) {
+    keywords.pop();
+    renderKeywords();
+  }
+});
+renderKeywords();
+
+async function lookup() {
+  var username = String($('username').value || '').trim().replace(/^@/, '');
+  if (!username) { toast('اول نام کاربری آپارات را وارد کن', true); return; }
+  $('lookupBtn').disabled = true;
+  $('lookupBtn').innerHTML = '<span class="spinner"></span> جستجو...';
+  try {
+    var r = await fetch('/api/streamers/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username })
+    });
+    var j = await r.json();
+    if (!r.ok || !j.ok) {
+      toast(j.error || ('HTTP ' + r.status), true);
+      $('preview').classList.add('hidden');
+      lastLookup = null;
+    } else {
+      lastLookup = j;
+      $('preview').classList.remove('hidden');
+      var pic = $('prev-pic');
+      if (j.pic_s) {
+        pic.innerHTML = '<img src="' + esc(j.pic_s) + '" alt="" onerror="this.parentNode.innerHTML=\'<div class=&quot;fb&quot;>' + esc(initialLetter(j.name || username)) + '</div>\'">';
+      } else {
+        pic.innerHTML = '<div class="fb">' + esc(initialLetter(j.name || username)) + '</div>';
+      }
+      $('prev-name').textContent = j.name || username;
+      $('prev-un').textContent = '@' + j.username;
+      if (!$('display').value) $('display').value = j.name || '';
+      toast('پیدا شد: ' + (j.name || j.username));
+    }
+  } catch (e) {
+    toast('جستجو ناموفق بود: ' + e.message, true);
+  } finally {
+    $('lookupBtn').disabled = false;
+    $('lookupBtn').textContent = 'جستجو';
+  }
+}
+$('lookupBtn').onclick = lookup;
+
+async function save() {
+  var username = String($('username').value || '').trim().replace(/^@/, '');
+  if (!username) { toast('نام کاربری آپارات را وارد کن', true); return; }
+
+  $('saveBtn').disabled = true;
+  $('saveBtn').innerHTML = '<span class="spinner"></span> در حال افزودن...';
+
+  var body = {
+    username: username,
+    display: String($('display').value || '').trim(),
+    keywords: keywords.slice(),
+    initial_score: Number($('initial-score').value) || 0
+  };
+
+  try {
+    var r = await fetch('/api/streamers/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    var j = await r.json();
+    if (!r.ok || !j.ok) {
+      toast(j.error || ('HTTP ' + r.status), true);
+    } else {
+      toast('اضافه شد: ' + (j.streamer.display || j.streamer.username));
+      var info = $('added');
+      info.classList.remove('hidden');
+      info.innerHTML =
+        '<b>✓ با موفقیت اضافه شد</b><br>' +
+        'نام کاربری: <code dir="ltr">' + esc(j.streamer.username) + '</code><br>' +
+        'نام نمایشی: ' + esc(j.streamer.display) + '<br>' +
+        'کلمات حساس: ' + esc((j.streamer.keywords || []).join(' · ') || '—') + '<br>' +
+        'امتیاز: ' + esc(j.streamer.score) + '<br>' +
+        'عکس پروفایل: ' + (j.streamer.pic_src ? '<a href="' + esc(j.streamer.pic_src) + '" target="_blank" style="color:#9ecbff">' + esc(j.streamer.pic) + '</a>' : '<i>دانلود نشد</i>');
+      $('username').value = '';
+      $('display').value = '';
+      $('initial-score').value = '0';
+      $('preview').classList.add('hidden');
+      lastLookup = null;
+      keywords = [];
+      renderKeywords();
+    }
+  } catch (e) {
+    toast('ناموفق: ' + e.message, true);
+  } finally {
+    $('saveBtn').disabled = false;
+    $('saveBtn').textContent = '+ افزودن به بازی';
+  }
+}
+$('saveBtn').onclick = save;
+
+$('resetBtn').onclick = function () {
+  $('username').value = '';
+  $('display').value = '';
+  $('initial-score').value = '0';
+  $('preview').classList.add('hidden');
+  $('added').classList.add('hidden');
+  lastLookup = null;
+  keywords = [];
+  renderKeywords();
+};
+
+$('username').addEventListener('blur', function () {
+  var u = String(this.value || '').trim().replace(/^@/, '');
+  if (u && u !== (lastLookup && lastLookup.username)) lookup();
+});
+</script>
+</body>
+</html>

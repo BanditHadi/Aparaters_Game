@@ -1,0 +1,6 @@
+aiohttp>=3.9
+playwright>=1.40
+edge-tts>=6.1
+Babel>=2.12
+pytchat>=0.5        # optional (only for --source youtube)
+pyttsx3>=2.90       # optional (only if TTS_ENGINE=pyttsx3)
